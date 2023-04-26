@@ -1,3 +1,8 @@
+
+/*BSD 3-Clause License
+ *
+ *Copyright (c) 2023, Andrea Zucchelli
+*/
 package net.zukka.fsecdahash;
 
 import java.io.ByteArrayInputStream;
@@ -38,7 +43,7 @@ public class FseCdaHashApplication implements CommandLineRunner {
 		log.info("Application started");
 		org.apache.xml.security.Init.init();
 		// read input xml
-		if (args.length==0){
+		if (args.length == 0) {
 			log.error("No input file given");
 			return;
 		}
