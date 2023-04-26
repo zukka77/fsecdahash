@@ -52,7 +52,7 @@ public class FseCdaHashApplication implements CommandLineRunner {
 
 		var xmlOutputDigest = DigestUtils.sha256Hex(canonicalizedXmlBA);
 
-		log.info("Canonicalized XML:\n{}", new String(canonicalizedXmlBA, "UTF-8"));
+		log.debug("Canonicalized XML:\n{}", new String(canonicalizedXmlBA, "UTF-8"));
 		log.info("Input sha:\n{}\nOutput sha:\n{}", xmlInputDigest, xmlOutputDigest);
 
 	}
@@ -67,8 +67,11 @@ public class FseCdaHashApplication implements CommandLineRunner {
 		var expression = xpath.compile("//legalAuthenticator");
 
 		var legalAuthenticatorNode = (Node) expression.evaluate(document, XPathConstants.NODE);
-		legalAuthenticatorNode.getParentNode().removeChild(legalAuthenticatorNode);
-
+		if (legalAuthenticatorNode != null) {
+			legalAuthenticatorNode.getParentNode().removeChild(legalAuthenticatorNode);
+		} else {
+			log.warn("legalAuthenticator node not found");
+		}
 		var tf = TransformerFactory.newInstance();
 		var t = tf.newTransformer();
 		var strippedDocBAOS = new ByteArrayOutputStream();
