@@ -38,6 +38,10 @@ public class FseCdaHashApplication implements CommandLineRunner {
 		log.info("Application started");
 		org.apache.xml.security.Init.init();
 		// read input xml
+		if (args.length==0){
+			log.error("No input file given");
+			return;
+		}
 		var inputFile = new FileInputStream(args[0]);
 		var xml = inputFile.readAllBytes();
 		inputFile.close();
