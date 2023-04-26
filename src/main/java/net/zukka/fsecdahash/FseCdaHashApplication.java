@@ -37,41 +37,42 @@ public class FseCdaHashApplication implements CommandLineRunner {
 	public void run(String... args) throws Exception {
 		log.info("Application started");
 		org.apache.xml.security.Init.init();
-		//read input xml
-		var inputFile=new FileInputStream(args[0]);
-		var xml=inputFile.readAllBytes();
+		// read input xml
+		var inputFile = new FileInputStream(args[0]);
+		var xml = inputFile.readAllBytes();
 		inputFile.close();
-		var xmlInputDigest= DigestUtils.sha256Hex(xml);
+		var xmlInputDigest = DigestUtils.sha256Hex(xml);
 
-		var xmlStriped=stripLegalAuthenticator(xml);
+		var xmlStriped = stripLegalAuthenticator(xml);
 		var canonicalizer = Canonicalizer.getInstance(Canonicalizer.ALGO_ID_C14N_OMIT_COMMENTS);
-		var canonicalizedXmlBAOS=new ByteArrayOutputStream();
+		var canonicalizedXmlBAOS = new ByteArrayOutputStream();
 		canonicalizer.canonicalize(xmlStriped, canonicalizedXmlBAOS, true);
-		
-		var canonicalizedXmlBA=canonicalizedXmlBAOS.toByteArray();
-		
-		var xmlOutputDigest= DigestUtils.sha256Hex(canonicalizedXmlBA);
-		
-		log.info("Canonicalized XML:\n{}",new String(canonicalizedXmlBA,"UTF-8"));
-		log.info("Input sha:\n{}\nOutput sha:\n{}",xmlInputDigest,xmlOutputDigest);
+
+		var canonicalizedXmlBA = canonicalizedXmlBAOS.toByteArray();
+
+		var xmlOutputDigest = DigestUtils.sha256Hex(canonicalizedXmlBA);
+
+		log.info("Canonicalized XML:\n{}", new String(canonicalizedXmlBA, "UTF-8"));
+		log.info("Input sha:\n{}\nOutput sha:\n{}", xmlInputDigest, xmlOutputDigest);
 
 	}
 
-	public byte[] stripLegalAuthenticator(byte[] inputxml) throws TransformerException, SAXException, IOException, ParserConfigurationException, XPathExpressionException{
+	public byte[] stripLegalAuthenticator(byte[] inputxml) throws TransformerException, SAXException, IOException,
+			ParserConfigurationException, XPathExpressionException {
 		var dbf = DocumentBuilderFactory.newInstance();
-        var document = dbf.newDocumentBuilder().parse(new ByteArrayInputStream(inputxml));
+		var document = dbf.newDocumentBuilder().parse(new ByteArrayInputStream(inputxml));
 
-        var xpf = XPathFactory.newInstance();
-        var xpath = xpf.newXPath();
-        var expression = xpath.compile("//legalAuthenticator");
+		var xpf = XPathFactory.newInstance();
+		var xpath = xpf.newXPath();
+		var expression = xpath.compile("//legalAuthenticator");
 
-        var legalAuthenticatorNode = (Node) expression.evaluate(document, XPathConstants.NODE);
-        legalAuthenticatorNode.getParentNode().removeChild(legalAuthenticatorNode);
+		var legalAuthenticatorNode = (Node) expression.evaluate(document, XPathConstants.NODE);
+		legalAuthenticatorNode.getParentNode().removeChild(legalAuthenticatorNode);
 
-        var tf = TransformerFactory.newInstance();
-        var t = tf.newTransformer();
-		var strippedDocBAOS=new ByteArrayOutputStream();
-        t.transform(new DOMSource(document), new StreamResult(strippedDocBAOS));
+		var tf = TransformerFactory.newInstance();
+		var t = tf.newTransformer();
+		var strippedDocBAOS = new ByteArrayOutputStream();
+		t.transform(new DOMSource(document), new StreamResult(strippedDocBAOS));
 		return strippedDocBAOS.toByteArray();
 	}
 
